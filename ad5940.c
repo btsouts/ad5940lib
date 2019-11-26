@@ -59,6 +59,7 @@ static BoolFlag bIsS2silicon = bFALSE;
 #ifndef CHIPSEL_M355
 static uint32_t AD5940_SPIReadReg(uint16_t RegAddr);
 static void AD5940_SPIWriteReg(uint16_t RegAddr, uint32_t RegData);
+static void AD5940_SPIWriteRegCSSelect(uint16_t RegAddr, uint32_t RegData, uint32_t CSPin);
 #else
 static uint32_t AD5940_D2DReadReg(uint16_t RegAddr);
 static void AD5940_D2DWriteReg(uint16_t RegAddr, uint32_t RegData);
@@ -735,6 +736,29 @@ static void AD5940_SPIWriteReg(uint16_t RegAddr, uint32_t RegData)
 }
 
 /**
+ * @brief Write register through SPI.
+ * @param RegAddr: The register address.
+ * @param RegData: The register data.
+ * @return Return None.
+**/
+static void AD5940_SPIWriteRegCSSelect(uint16_t RegAddr, uint32_t RegData, uint32_t CSPin)
+{  
+  /* Set register address */
+  //AD5940_CsClr(); Clear specified pin
+  AD5940_ReadWrite8B(SPICMD_SETADDR);
+  AD5940_ReadWrite16B(RegAddr);
+  AD5940_CsSet();
+  /* Add delay here to meet the SPI timing. */
+  AD5940_CsClr();
+  AD5940_ReadWrite8B(SPICMD_WRITEREG);
+  if(((RegAddr>=0x1000)&&(RegAddr<=0x3014)))
+    AD5940_ReadWrite32B(RegData);
+  else
+    AD5940_ReadWrite16B(RegData);
+  //AD5940_CsSet(); Set specified pin
+}
+
+/**
  * @brief Read register through SPI.
  * @param RegAddr: The register address.
  * @return Return register data.
@@ -831,6 +855,27 @@ void AD5940_WriteReg(uint16_t RegAddr, uint32_t RegData)
     AD5940_D2DWriteReg(RegAddr, RegData);
 #else
     AD5940_SPIWriteReg(RegAddr, RegData);
+#endif
+}
+
+/**
+ * @brief Write register. If sequencer generator is enabled, the register write is recorded. 
+ *        Otherwise, the data is written to AD5940 by SPI.
+ * @param RegAddr: The register address.
+ * @param RegData: The register data.
+ * @return Return None.
+**/
+void AD5940_WriteRegCSSelect(uint16_t RegAddr, uint32_t RegData, uint32_t CSPin)
+{
+#ifdef SEQUENCE_GENERATOR
+  if(SeqGenDB.EngineStart == bTRUE)
+    AD5940_SEQWriteReg(RegAddr, RegData);
+  else
+#endif
+#ifdef CHIPSEL_M355
+    AD5940_D2DWriteReg(RegAddr, RegData);
+#else
+    AD5940_SPIWriteRegCSSelect(RegAddr, RegData, CSPin);
 #endif
 }
 

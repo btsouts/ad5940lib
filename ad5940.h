@@ -4759,6 +4759,7 @@ typedef struct
 */
 /* 1. Basic SPI functions */
 void      AD5940_WriteReg(uint16_t RegAddr, uint32_t RegData);
+void      AD5940_WriteRegCSSelect(uint16_t RegAddr, uint32_t RegData, uint32_t CSPin);
 uint32_t  AD5940_ReadReg(uint16_t RegAddr);
 void      AD5940_FIFORd(uint32_t *pBuffer,uint32_t uiReadCount);
 
@@ -4903,6 +4904,8 @@ float     AD5940_ComplexPhase(fImpCar_Type *a);
 */
 void      AD5940_CsClr(void);
 void      AD5940_CsSet(void);
+void      AD5940_SPI1CsClr(void);
+void      AD5940_SPI1CsSet(void);
 void      AD5940_RstClr(void);
 void      AD5940_RstSet(void);
 void      AD5940_Delay10us(uint32_t time);
@@ -4911,6 +4914,7 @@ void      AD5940_MCUGpioWrite(uint32_t data);   /*  */
 uint32_t  AD5940_MCUGpioRead(uint32_t);
 void      AD5940_MCUGpioCtrl(uint32_t, BoolFlag);
 void      AD5940_ReadWriteNBytes(unsigned char *pSendBuffer,unsigned char *pRecvBuff,unsigned long length);
+void      AD5940_SPI1ReadWriteNBytes(unsigned char *pSendBuffer,unsigned char *pRecvBuff,unsigned long length);
 /* Below functions are frequently used in example code but not necessary for library */
 uint32_t  AD5940_GetMCUIntFlag(void);
 uint32_t  AD5940_ClrMCUIntFlag(void);
